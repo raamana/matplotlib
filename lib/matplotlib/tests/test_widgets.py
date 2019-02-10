@@ -253,7 +253,8 @@ def test_lasso_selector():
 
 def test_CheckButtons():
     ax = get_ax()
-    check = widgets.CheckButtons(ax, ('a', 'b', 'c'), (True, False, True))
+    labels = ('a', 'b', 'c')
+    check = widgets.CheckButtons(ax, labels, (True, False, True))
     assert check.get_status() == [True, False, True]
     check.set_active(0)
     assert check.get_status() == [False, False, True]
@@ -261,6 +262,14 @@ def test_CheckButtons():
     check.clear()
     assert not any(check.get_status())
     assert len(check.get_checked_labels()) == 0
+
+    for invalid_index in [-1, len(labels), len(labels)+5]:
+        with pytest.raises(ValueError):
+            check.set_active(index=invalid_index)
+
+    for invalid_value in ['invalid', -1, None]:
+        with pytest.raises(TypeError):
+            check.set_active(1, state=invalid_value)
 
     cid = check.on_clicked(lambda: None)
     check.disconnect(cid)
