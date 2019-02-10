@@ -19,6 +19,7 @@ from .lines import Line2D
 from .patches import Circle, Rectangle, Ellipse
 from .transforms import blended_transform_factory
 
+_TOGGLE = object()
 
 class LockDraw(object):
     """
@@ -536,30 +537,22 @@ class CheckButtons(AxesWidget):
 
     Connect to the CheckButtons with the :meth:`on_clicked` method
     """
-    def __init__(self, ax, labels, actives=None):
+    def __init__(self, ax, labels, actives):
         """
         Add check buttons to :class:`matplotlib.axes.Axes` instance *ax*
 
-        Parameters
-        ----------
-        ax : `~matplotlib.axes.Axes`
-            The parent axes for the widget.
+        *labels*
+            A len(buttons) list of labels as strings
 
-        labels : List[str]
-            The labels of the check buttons.
-
-        actives : List[bool], optional
-            The initial check states of the buttons. The list must have the
-            same length as *labels*. If not given, all buttons are unchecked.
+        *actives*
+            A len(buttons) list of booleans indicating whether
+             the button is active
         """
         AxesWidget.__init__(self, ax)
 
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_navigate(False)
-
-        if actives is None:
-            actives = [False] * len(labels)
 
         if len(labels) > 1:
             dy = 1. / (len(labels) + 1)
@@ -568,6 +561,7 @@ class CheckButtons(AxesWidget):
             dy = 0.25
             ys = [0.5]
 
+        cnt = 0
         axcolor = ax.get_facecolor()
 
         self.labels = []
@@ -576,13 +570,13 @@ class CheckButtons(AxesWidget):
 
         lineparams = {'color': 'k', 'linewidth': 1.25,
                       'transform': ax.transAxes, 'solid_capstyle': 'butt'}
-        for y, label, active in zip(ys, labels, actives):
+        for y, label in zip(ys, labels):
             t = ax.text(0.25, y, label, transform=ax.transAxes,
                         horizontalalignment='left',
                         verticalalignment='center')
 
-            w, h = dy / 2, dy / 2
-            x, y = 0.05, y - h / 2
+            w, h = dy / 2., dy / 2.
+            x, y = 0.05, y - h / 2.
 
             p = Rectangle(xy=(x, y), width=w, height=h, edgecolor='black',
                           facecolor=axcolor, transform=ax.transAxes)
@@ -590,14 +584,15 @@ class CheckButtons(AxesWidget):
             l1 = Line2D([x, x + w], [y + h, y], **lineparams)
             l2 = Line2D([x, x + w], [y, y + h], **lineparams)
 
-            l1.set_visible(active)
-            l2.set_visible(active)
+            l1.set_visible(actives[cnt])
+            l2.set_visible(actives[cnt])
             self.labels.append(t)
             self.rectangles.append(p)
             self.lines.append((l1, l2))
             ax.add_patch(p)
             ax.add_line(l1)
             ax.add_line(l2)
+            cnt += 1
 
         self.connect_event('button_press_event', self._clicked)
 
@@ -613,13 +608,22 @@ class CheckButtons(AxesWidget):
                 self.set_active(i)
                 break
 
-    def set_active(self, index):
+    def set_active(self, index, state=_TOGGLE):
         """
         Directly (de)activate a check button by index.
+        Default behaviour is to toggle the state,
+        which can be controlled with state=bool flag.
 
         *index* is an index into the original label list
-            that this object was constructed with.
-            Raises ValueError if *index* is invalid.
+        that this object was constructed with.
+        Raises ValueError if *index* is invalid.
+
+        *state* is a boolean value to set the target state
+        of the button, regardless of its current state.
+        By default (no value specified),
+        the button state gets toggled (checked or not).
+        Only True or False values are allowed for *state*,
+        Raises TypeError otherwise.
 
         Callbacks will be triggered if :attr:`eventson` is True.
 
@@ -628,16 +632,44 @@ class CheckButtons(AxesWidget):
             raise ValueError("Invalid CheckButton index: %d" % index)
 
         l1, l2 = self.lines[index]
-        l1.set_visible(not l1.get_visible())
-        l2.set_visible(not l2.get_visible())
+
+        if state is not _TOGGLE:
+            if not isinstance(state, bool):
+                raise TypeError('state can only be either True or False')
+            target_vis = state
+        else:
+            target_vis = not l1.get_visible()
+
+        l1.set_visible(target_vis)
+        l2.set_visible(target_vis)
 
         if self.drawon:
             self.ax.figure.canvas.draw()
 
+        self._exec_callbacks(self.labels[index].get_text())
+
+    def clear(self):
+        """Clears all the checkboxes"""
+
+        for l1, l2 in self.lines:
+            l1.set_visible(False)
+            l2.set_visible(False)
+
+        if self.drawon:
+            self.ax.figure.canvas.draw()
+
+        # calling it with no label, as all checkboxes are being cleared
+        self._exec_callbacks(None)
+
+    def _exec_callbacks(self, current_label=None):
+        """Runs all the registered callbacks."""
+
         if not self.eventson:
             return
+
         for cid, func in self.observers.items():
-            func(self.labels[index].get_text())
+            func(current_label)
+
 
     def get_status(self):
         """
@@ -645,11 +677,18 @@ class CheckButtons(AxesWidget):
         """
         return [l1.get_visible() for (l1, l2) in self.lines]
 
+    def get_checked_labels(self):
+        """Returns a list of labels currently checked by user."""
+
+        return [l.get_text() for l, box_checked in
+                zip(self.labels, self.get_status())
+                if box_checked]
+
     def on_clicked(self, func):
         """
-        Connect the callback function *func* to button click events.
+        When the button is clicked, call *func* with button label
 
-        Returns a connection id, which can be used to disconnect the callback.
+        A connection id is returned which can be used to disconnect
         """
         cid = self.cnt
         self.observers[cid] = func
