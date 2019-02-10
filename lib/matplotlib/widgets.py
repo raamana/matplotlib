@@ -1012,11 +1012,10 @@ class RadioButtons(AxesWidget):
     """
     A GUI neutral radio button.
 
-    For the buttons to remain responsive you must keep a reference to this
+    For the buttons to remain responsive, you must keep a reference to this
     object.
 
-    Connect to the RadioButtons with the :meth:`on_clicked` method.
-
+    Connect to the RadioButtons with the :meth:`on_clicked` method
 
     Attributes
     ----------
@@ -1030,18 +1029,20 @@ class RadioButtons(AxesWidget):
         A list of `~.patches.Circle` instances defining the buttons.
     value_selected : str
         The label text of the currently selected button.
+    *index_selected*
+        An index into *labels* identifying the value selected.
 
     """
     def __init__(self, ax, labels, active=0, activecolor='blue'):
         """
-        Add radio buttons to an `~.axes.Axes`.
+        Add radio buttons to :class:`matplotlib.axes.Axes` instance *ax*
 
         Parameters
         ----------
         ax : `~matplotlib.axes.Axes`
             The axes to add the buttons to.
         labels : list of str
-            The button labels.
+            A len(buttons) list of labels as strings
         active : int
             The index of the initially selected button.
         activecolor : color
@@ -1075,6 +1076,7 @@ class RadioButtons(AxesWidget):
 
             if cnt == active:
                 self.value_selected = label
+                self.index_selected = active
                 facecolor = activecolor
             else:
                 facecolor = axcolor
@@ -1108,7 +1110,11 @@ class RadioButtons(AxesWidget):
 
     def set_active(self, index):
         """
-        Select button with number *index*.
+        Trigger which radio button to make active.
+
+        *index* is an index into the original label list
+            that this object was constructed with.
+            Raise ValueError if the index is invalid.
 
         Callbacks will be triggered if :attr:`eventson` is True.
         """
@@ -1116,6 +1122,7 @@ class RadioButtons(AxesWidget):
             raise ValueError("Invalid RadioButton index: %d" % index)
 
         self.value_selected = self.labels[index].get_text()
+        self.index_selected = index
 
         for i, p in enumerate(self.circles):
             if i == index:
@@ -1127,21 +1134,39 @@ class RadioButtons(AxesWidget):
         if self.drawon:
             self.ax.figure.canvas.draw()
 
-        if not self.eventson:
-            return
-        for cid, func in self.observers.items():
-            func(self.labels[index].get_text())
+        self._exec_callbacks(self.labels[index].get_text())
+
+    def clear(self):
+        """Deactivate any previously activated button."""
+        if self.index_selected is not None:
+            ax_facecolor = self.ax.get_facecolor()
+            self.circles[self.index_selected].set_facecolor(ax_facecolor)
+        self.value_selected = None
+        self.index_selected = None
+
+        # calling it with no label, as all buttons are being cleared
+        self._exec_callbacks(None)
 
     def on_clicked(self, func):
         """
-        Connect the callback function *func* to button click events.
+        When the button is clicked, call *func* with button label
+        When all buttons are cleared, call *func* with None
 
-        Returns a connection id, which can be used to disconnect the callback.
+        A connection id is returned which can be used to disconnect
         """
         cid = self.cnt
         self.observers[cid] = func
         self.cnt += 1
         return cid
+
+    def _exec_callbacks(self, current_label=None):
+        """Runs all the registered callbacks."""
+
+        if not self.eventson:
+            return
+
+        for cid, func in self.observers.items():
+            func(current_label)
 
     def disconnect(self, cid):
         """Remove the observer with connection id *cid*."""
