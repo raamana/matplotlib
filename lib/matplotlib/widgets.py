@@ -21,6 +21,7 @@ from .transforms import blended_transform_factory
 
 _TOGGLE = object()
 
+
 class LockDraw(object):
     """
     Some widgets, like the cursor, draw onto the canvas, and this is not
@@ -669,7 +670,6 @@ class CheckButtons(AxesWidget):
 
         for cid, func in self.observers.items():
             func(current_label)
-
 
     def get_status(self):
         """
