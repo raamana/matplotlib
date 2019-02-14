@@ -1183,10 +1183,15 @@ class RadioButtons(AxesWidget):
         func : callable
             When the button is clicked, call *func* with button label
             When all buttons are cleared, call *func* with None
+            The callback func must have the signature::
+
+                def func(label: str) -> Any
+
+            Return values may exist, but are ignored.
 
         Returns
         -------
-            A connection id, which can be used to disconnect
+            A connection id, which can be used to disconnect.
         """
         cid = self.cnt
         self.observers[cid] = func
