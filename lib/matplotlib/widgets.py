@@ -542,10 +542,12 @@ class CheckButtons(AxesWidget):
         """
         Add check buttons to :class:`matplotlib.axes.Axes` instance *ax*
 
-        *labels*
+        Parameters
+        ----------
+        labels : list
             A len(buttons) list of labels as strings
 
-        *actives*
+        actives : list
             A len(buttons) list of booleans indicating whether
              the button is active
         """
@@ -576,8 +578,8 @@ class CheckButtons(AxesWidget):
                         horizontalalignment='left',
                         verticalalignment='center')
 
-            w, h = dy / 2., dy / 2.
-            x, y = 0.05, y - h / 2.
+            w, h = dy / 2, dy / 2
+            x, y = 0.05, y - h / 2
 
             p = Rectangle(xy=(x, y), width=w, height=h, edgecolor='black',
                           facecolor=axcolor, transform=ax.transAxes)
@@ -612,6 +614,7 @@ class CheckButtons(AxesWidget):
     def set_active(self, index, state=_TOGGLE):
         """
         Directly (de)activate a check button by index.
+
         Default behaviour is to toggle the state,
         which can be controlled with state=bool flag.
 
@@ -650,7 +653,7 @@ class CheckButtons(AxesWidget):
         self._exec_callbacks(self.labels[index].get_text())
 
     def clear(self):
-        """Clears all the checkboxes"""
+        """Clear all checkboxes."""
 
         for l1, l2 in self.lines:
             l1.set_visible(False)
@@ -1030,7 +1033,7 @@ class RadioButtons(AxesWidget):
     value_selected : str
         The label text of the currently selected button.
     *index_selected*
-        An index into *labels* identifying the value selected.
+        The index of the selected button.
 
     """
     def __init__(self, ax, labels, active=0, activecolor='blue'):
@@ -1042,7 +1045,7 @@ class RadioButtons(AxesWidget):
         ax : `~matplotlib.axes.Axes`
             The axes to add the buttons to.
         labels : list of str
-            A len(buttons) list of labels as strings
+            The button labels.
         active : int
             The index of the initially selected button.
         activecolor : color
@@ -1112,11 +1115,17 @@ class RadioButtons(AxesWidget):
         """
         Trigger which radio button to make active.
 
-        *index* is an index into the original label list
-            that this object was constructed with.
-            Raise ValueError if the index is invalid.
-
         Callbacks will be triggered if :attr:`eventson` is True.
+
+        Parameters
+        ----------
+        index : int
+            The index of the button to activate.
+
+        Raises
+        ------
+        ValueError
+            if the index is invalid.
         """
         if index < 0 or index >= len(self.labels):
             raise ValueError("Invalid RadioButton index: %d" % index)
@@ -1160,7 +1169,7 @@ class RadioButtons(AxesWidget):
         return cid
 
     def _exec_callbacks(self, current_label=None):
-        """Runs all the registered callbacks."""
+        """Run all the registered callbacks."""
 
         if not self.eventson:
             return
