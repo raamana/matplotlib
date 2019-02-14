@@ -523,13 +523,13 @@ class CheckButtons(AxesWidget):
 
     Attributes
     ----------
-     *ax*
+     ax
         The :class:`matplotlib.axes.Axes` instance the buttons are located in
 
-     *labels*
+     labels
         List of :class:`matplotlib.text.Text` instances
 
-     *lines*
+     lines
         List of (line1, line2) tuples for the x's in the check boxes.
         These lines exist for each box, but have ``set_visible(False)``
         when its box is not checked.
@@ -621,7 +621,7 @@ class CheckButtons(AxesWidget):
         index : int
             index into the original label list
 
-        *state* : bool
+        state : bool
             boolean value to set the target state of the button, regardless of
             its current state. By default (no value specified),  the button
             state gets toggled (checked or not). Only True or False values
@@ -669,7 +669,7 @@ class CheckButtons(AxesWidget):
         self._exec_callbacks(None)
 
     def _exec_callbacks(self, current_label=None):
-        """Runs all the registered callbacks."""
+        """Run all registered callbacks."""
 
         if not self.eventson:
             return
@@ -1035,7 +1035,7 @@ class RadioButtons(AxesWidget):
         A list of `~.patches.Circle` instances defining the buttons.
     value_selected : str
         The label text of the currently selected button.
-    *index_selected*
+    index_selected
         The index of the selected button.
 
     """
