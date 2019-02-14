@@ -550,7 +550,7 @@ class CheckButtons(AxesWidget):
             A len(buttons) list of labels as strings
 
         actives : list of bool, None
-            A len(buttons) list of booleans indicating which buttons are active.
+            A ist of booleans indicating which buttons are active
         """
         AxesWidget.__init__(self, ax)
 
@@ -625,7 +625,8 @@ class CheckButtons(AxesWidget):
             index into the original label list
 
         state : bool, optional
-            Sets the target state of the button. Boolean values set the state explicitly.
+            Sets the target state of the button.
+            Boolean values set the state explicitly.
             If no value is provided, the state gets toggled.
 
         Raises
