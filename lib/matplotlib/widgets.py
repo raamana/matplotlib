@@ -516,14 +516,15 @@ class CheckButtons(AxesWidget):
     """
     A GUI neutral set of check buttons.
 
-    For the check buttons to remain responsive you must keep a
-    reference to this object.
+    For the check buttons to remain responsive you must keep a reference to
+    this object.
 
-    The following attributes are exposed
+    Connect to the CheckButtons with the :meth:`on_clicked` method.
 
+    Attributes
+    ----------
      *ax*
-        The :class:`matplotlib.axes.Axes` instance the buttons are
-        located in
+        The :class:`matplotlib.axes.Axes` instance the buttons are located in
 
      *labels*
         List of :class:`matplotlib.text.Text` instances
@@ -535,8 +536,6 @@ class CheckButtons(AxesWidget):
 
      *rectangles*
         List of :class:`matplotlib.patches.Rectangle` instances
-
-    Connect to the CheckButtons with the :meth:`on_clicked` method
     """
     def __init__(self, ax, labels, actives):
         """
