@@ -546,7 +546,7 @@ class CheckButtons(AxesWidget):
         labels : list
             A len(buttons) list of labels as strings
 
-        active_buttons : list
+        actives : list, None
             A len(buttons) list of booleans indicating which buttons are active
         """
         AxesWidget.__init__(self, ax)
@@ -567,6 +567,9 @@ class CheckButtons(AxesWidget):
         self.labels = []
         self.lines = []
         self.rectangles = []
+
+        if actives is None:
+            actives = [False, ]*len(labels)
 
         lineparams = {'color': 'k', 'linewidth': 1.25,
                       'transform': ax.transAxes, 'solid_capstyle': 'butt'}
