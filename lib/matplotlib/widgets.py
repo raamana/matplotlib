@@ -535,19 +535,22 @@ class CheckButtons(AxesWidget):
         when its box is not checked.
 
      *rectangles*
-        List of :class:`matplotlib.patches.Rectangle` instances
+        List of :class:`matplotlib.patches.Rectangle` instances.
     """
     def __init__(self, ax, labels, actives=None):
         """
-        Add check buttons to :class:`matplotlib.axes.Axes` instance *ax*
+        Add check buttons to :class:`matplotlib.axes.Axes` instance *ax*.
 
         Parameters
         ----------
-        labels : list
+        ax : :class:`matplotlib.axes.Axes`
+            Axis the buttons are located in
+
+        labels : list of str
             A len(buttons) list of labels as strings
 
-        actives : list, None
-            A len(buttons) list of booleans indicating which buttons are active
+        actives : list of bool, None
+            A len(buttons) list of booleans indicating which buttons are active.
         """
         AxesWidget.__init__(self, ax)
 
@@ -614,9 +617,6 @@ class CheckButtons(AxesWidget):
         """
         Directly (de)activate a check button by index.
 
-        Default behaviour is to toggle the state, which can be controlled with
-        state=bool flag.
-
         Callbacks will be triggered if :attr:`eventson` is True.
 
         Parameters
@@ -624,19 +624,17 @@ class CheckButtons(AxesWidget):
         index : int
             index into the original label list
 
-        state : bool
-            boolean value to set the target state of the button, regardless of
-            its current state. By default (no value specified),  the button
-            state gets toggled (checked or not). Only True or False values
-            are allowed for *state*
+        state : bool, optional
+            Sets the target state of the button. Boolean values set the state explicitly.
+            If no value is provided, the state gets toggled.
 
         Raises
         ------
         ValueError
-            If *index* is invalid.
+            If `index` is invalid.
 
         TypeError
-            If state is not boolean.
+            If `state` is not boolean.
         """
         if index < 0 or index >= len(self.labels):
             raise ValueError("Invalid CheckButton index: %d" % index)
@@ -682,12 +680,12 @@ class CheckButtons(AxesWidget):
 
     def get_status(self):
         """
-        returns a tuple of the status (True/False) of all of the check buttons
+        Return a tuple of the status (True/False) of all of the check buttons.
         """
         return [l1.get_visible() for (l1, l2) in self.lines]
 
     def get_checked_labels(self):
-        """Returns a list of labels currently checked by user."""
+        """Return a list of labels currently checked by user."""
 
         return [l.get_text() for l, box_checked in
                 zip(self.labels, self.get_status())
@@ -695,9 +693,22 @@ class CheckButtons(AxesWidget):
 
     def on_clicked(self, func):
         """
-        When the button is clicked, call *func* with button label
+        Connect the callback function *func* to button click events.
 
-        A connection id is returned which can be used to disconnect
+        Parameters
+        ----------
+        func : callable
+            When the button is clicked, call *func* with button label
+            When all buttons are cleared, call *func* with None
+            The callback func must have the signature::
+
+                def func(label: str) -> Any
+
+            Return values may exist, but are ignored.
+
+        Returns
+        -------
+            A connection id, which can be used to disconnect the callback.
         """
         cid = self.cnt
         self.observers[cid] = func
@@ -705,7 +716,7 @@ class CheckButtons(AxesWidget):
         return cid
 
     def disconnect(self, cid):
-        """remove the observer with connection id *cid*"""
+        """remove the observer with connection id *cid*."""
         try:
             del self.observers[cid]
         except KeyError:
@@ -1024,7 +1035,7 @@ class RadioButtons(AxesWidget):
     For the buttons to remain responsive, you must keep a reference to this
     object.
 
-    Connect to the RadioButtons with the :meth:`on_clicked` method
+    Connect to the RadioButtons with the :meth:`on_clicked` method.
 
     Attributes
     ----------
@@ -1044,7 +1055,7 @@ class RadioButtons(AxesWidget):
     """
     def __init__(self, ax, labels, active=0, activecolor='blue'):
         """
-        Add radio buttons to :class:`matplotlib.axes.Axes` instance *ax*
+        Add radio buttons to :class:`matplotlib.axes.Axes` instance *ax*.
 
         Parameters
         ----------
@@ -1164,7 +1175,7 @@ class RadioButtons(AxesWidget):
 
     def on_clicked(self, func):
         """
-        Set callback function.
+        Connect the callback function *func* to button click events.
 
         Parameters
         ----------
