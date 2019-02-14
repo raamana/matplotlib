@@ -537,7 +537,7 @@ class CheckButtons(AxesWidget):
      *rectangles*
         List of :class:`matplotlib.patches.Rectangle` instances
     """
-    def __init__(self, ax, labels, actives):
+    def __init__(self, ax, labels, active_buttons):
         """
         Add check buttons to :class:`matplotlib.axes.Axes` instance *ax*
 
@@ -546,9 +546,8 @@ class CheckButtons(AxesWidget):
         labels : list
             A len(buttons) list of labels as strings
 
-        actives : list
-            A len(buttons) list of booleans indicating whether
-             the button is active
+        active_buttons : list
+            A len(buttons) list of booleans indicating which buttons are active
         """
         AxesWidget.__init__(self, ax)
 
@@ -563,7 +562,6 @@ class CheckButtons(AxesWidget):
             dy = 0.25
             ys = [0.5]
 
-        cnt = 0
         axcolor = ax.get_facecolor()
 
         self.labels = []
@@ -572,7 +570,7 @@ class CheckButtons(AxesWidget):
 
         lineparams = {'color': 'k', 'linewidth': 1.25,
                       'transform': ax.transAxes, 'solid_capstyle': 'butt'}
-        for y, label in zip(ys, labels):
+        for y, label, active in zip(ys, labels, active_buttons):
             t = ax.text(0.25, y, label, transform=ax.transAxes,
                         horizontalalignment='left',
                         verticalalignment='center')
@@ -586,15 +584,14 @@ class CheckButtons(AxesWidget):
             l1 = Line2D([x, x + w], [y + h, y], **lineparams)
             l2 = Line2D([x, x + w], [y, y + h], **lineparams)
 
-            l1.set_visible(actives[cnt])
-            l2.set_visible(actives[cnt])
+            l1.set_visible(active)
+            l2.set_visible(active)
             self.labels.append(t)
             self.rectangles.append(p)
             self.lines.append((l1, l2))
             ax.add_patch(p)
             ax.add_line(l1)
             ax.add_line(l2)
-            cnt += 1
 
         self.connect_event('button_press_event', self._clicked)
 
